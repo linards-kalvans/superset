@@ -1,0 +1,12 @@
+[project]
+name = "superset"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "apache-superset>=4.1.1",
+    "pillow>=11.0.0",
+    "psycopg2-binary>=2.9.10",
+    "setuptools>=75.6.0",
+]
