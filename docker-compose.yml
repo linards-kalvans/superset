@@ -1,0 +1,41 @@
+version: "2"
+
+services:
+  metadata-db:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-superset}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-superset}
+      - POSTGRES_DB=${POSTGRES_DB:-superset}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-superset} -d ${POSTGRES_DB:-superset}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  superset:
+    build:
+      context: ./superset
+      dockerfile: Dockerfile
+    ports:
+      - 8088:8088
+    environment:
+      - SUPERSET_SECRET_KEY=${SUPERSET_SECRET_KEY:-clKxBIiV8F1vJYGuHEN30zMSM4mcuYT2xHie3ENPZAGfrCDQTW2WQFSUNxyNTPqI}
+      - FLASK_APP=superset
+      - METADATA_DB_URI=postgresql://${POSTGRES_USER:-superset}:${POSTGRES_PASSWORD:-superset}@metadata-db:5432/${POSTGRES_DB:-superset}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    entrypoint: ["/app/entrypoint.sh"]
+    depends_on:
+      - metadata-db
+    volumes:
+      - ./superset-init-lock:/app/superset-init-lock
+
+
+volumes:
+  postgres_data:
+  superset_init_lock:
